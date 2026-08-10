@@ -101,6 +101,10 @@ answers.
 
 ## Distribution
 
+Build the upload contents with `pnpm build:extension`. Package the contents of
+`dist/extension/` so `manifest.json` is at the ZIP root; do not add an
+`.output/chrome-mv3/` directory to the archive.
+
 Choose **Public** only when the listing, privacy policy, support contact, and
 screenshots are ready. Select the countries where the extension should be
 available. The extension is free and does not contain paid functionality.

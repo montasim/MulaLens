@@ -54,6 +54,9 @@ pnpm check
 ```
 
 Load `dist/extension/` as an unpacked extension, then reload any open Deshi Mula tabs.
+The extension has a single Chrome Manifest V3 target, so the build is intentionally
+flat: `manifest.json` is written to `dist/extension/manifest.json`, with no
+`.output/chrome-mv3/` intermediate directory.
 
 ## How it works
 
