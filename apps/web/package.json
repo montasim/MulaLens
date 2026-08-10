@@ -12,7 +12,8 @@
     "preview": "vite preview",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "check": "tsr generate && eslint && tsc --noEmit && vite build"
+    "test:deploy-filter": "node --test tests/netlify-build-filter.test.mjs",
+    "check": "tsr generate && eslint && tsc --noEmit && node --test tests/netlify-build-filter.test.mjs && vite build"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",
