@@ -7,6 +7,14 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
 const webRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const repoRoot = resolve(webRoot, '../..');
+
+function readTomlString(config, key) {
+  const match = config.match(new RegExp(`^\\s*${key}\\s*=\\s*(["'])(.*)\\1\\s*$`, 'm'));
+  assert.ok(match, `apps/web/netlify.toml must define build.${key}`);
+
+  return match[1] === '"' ? JSON.parse(`"${match[2]}"`) : match[2];
+}
 
 function git(cwd, ...args) {
   return execFileSync('git', args, { cwd, encoding: 'utf8' }).trim();
@@ -25,10 +33,16 @@ function runIgnoreCommand(command, cwd, cachedCommit, commit) {
   });
 }
 
+test('Netlify publishes the generated web client directory', () => {
+  const config = readFileSync(join(webRoot, 'netlify.toml'), 'utf8');
+  const publishDirectory = readTomlString(config, 'publish');
+
+  assert.equal(resolve(repoRoot, publishDirectory), join(webRoot, 'dist/client'));
+});
+
 test('Netlify skips extension-only changes and builds web-related changes', () => {
   const config = readFileSync(join(webRoot, 'netlify.toml'), 'utf8');
-  const ignoreCommand = config.match(/^\s*ignore\s*=\s*"([^"]+)"/m)?.[1];
-  assert.ok(ignoreCommand, 'apps/web/netlify.toml must define build.ignore');
+  const ignoreCommand = readTomlString(config, 'ignore');
 
   const fixture = mkdtempSync(join(tmpdir(), 'netlify-build-filter-'));
   try {
@@ -62,6 +76,16 @@ test('Netlify skips extension-only changes and builds web-related changes', () =
       runIgnoreCommand(ignoreCommand, fixture, extensionOnly, webChange).status,
       1,
       'a landing-page change should continue the Netlify build',
+    );
+    assert.equal(
+      runIgnoreCommand(ignoreCommand, fixture, webChange, webChange).status,
+      1,
+      'a cacheless redeploy should continue when cached and current refs are equal',
+    );
+    assert.equal(
+      runIgnoreCommand(ignoreCommand, fixture, '', webChange).status,
+      1,
+      'a build without a cached ref should continue',
     );
 
     writeFixture(fixture, 'package.json', '{"private":true}\n');
