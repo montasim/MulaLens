@@ -1,5 +1,6 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 
+import { SupportKoriWidget } from '../components/support-kori-widget'
 import appCss from '../styles.css?url'
 
 export const Route = createRootRoute({
@@ -47,13 +48,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         {children}
-        <script
-          src="https://www.supportkori.com/widget.js"
-          data-id="montasim"
-          data-message="Support montasim"
-          data-color="#FFDD00"
-          data-position="right"
-        ></script>
+        <SupportKoriWidget />
         <Scripts />
       </body>
     </html>
