@@ -25,7 +25,7 @@
   --ring: #187f73;
   --brand: #187f73;
   --brand-dark: #11655d;
-  --brand-soft: #187f73;
+  --brand-soft: #11655d;
   --radius: 0rem;
 }
 
@@ -106,18 +106,20 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-button,
-a {
-  -webkit-tap-highlight-color: transparent;
-}
+@layer base {
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
 
-button {
-  cursor: pointer;
-}
+  button {
+    cursor: pointer;
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 ::selection {
@@ -146,7 +148,7 @@ a {
   padding: 0.75rem;
   color: var(--muted-foreground);
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 600;
   transition: color 150ms ease, background-color 150ms ease;
 }
 

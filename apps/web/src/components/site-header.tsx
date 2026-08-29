@@ -28,7 +28,7 @@ export function SiteHeader() {
       <div className="mx-auto flex h-18 max-w-[1400px] items-center px-5 lg:px-10">
         <a href="#top" className="flex items-center gap-3" aria-label="MulaLens home">
           <BrandMark />
-          <span className="text-[15px] font-extrabold tracking-[-0.03em] sm:text-base">
+          <span className="text-[15px] font-bold tracking-[-0.03em] sm:text-base">
             Mula<span className="text-brand-soft">Lens</span>
           </span>
         </a>
@@ -64,7 +64,7 @@ export function SiteHeader() {
               <nav className="flex flex-col p-3" aria-label="Mobile navigation">
                 {links.map((link) => (
                   <SheetClose asChild key={link.href}>
-                    <a href={link.href} className="px-3 py-3.5 font-bold hover:bg-muted">
+                    <a href={link.href} className="px-3 py-3.5 font-semibold hover:bg-muted">
                       {link.label}
                     </a>
                   </SheetClose>
