@@ -131,6 +131,57 @@ body {
   outline-offset: 3px;
 }
 
+body .sk-widget-btn {
+  min-height: 42px;
+  gap: 9px;
+  padding: 10px 15px;
+  border: 1px solid var(--brand);
+  border-radius: 0;
+  background: var(--card);
+  color: var(--brand);
+  box-shadow: 0 10px 28px rgb(21 38 35 / 14%);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 650;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+body .sk-widget-btn:hover {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: white;
+  transform: translateY(-1px);
+}
+
+body .sk-widget-btn:focus-visible {
+  outline: 3px solid rgb(24 127 115 / 50%);
+  outline-offset: 3px;
+}
+
+body .sk-widget-btn svg {
+  width: 18px;
+  height: 18px;
+  color: currentColor;
+}
+
+body .sk-widget-btn:hover svg {
+  color: currentColor;
+}
+
+@media (max-width: 680px) {
+  body .sk-widget-iframe-container {
+    right: 14px;
+    left: 14px;
+    bottom: calc(env(safe-area-inset-bottom) + 70px);
+    width: auto;
+    height: min(550px, calc(100dvh - env(safe-area-inset-bottom) - 94px));
+  }
+}
+
 .page-grid {
   background-image:
     linear-gradient(rgb(21 38 35 / 0.045) 1px, transparent 1px),
