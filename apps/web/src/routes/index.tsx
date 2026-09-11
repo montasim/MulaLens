@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-import { SiteHeader, releaseUrl } from '#/components/site-header'
+import { SiteHeader, chromeWebStoreUrl } from '#/components/site-header'
 import { Button } from '#/components/ui/button'
 import {
   Accordion,
@@ -71,8 +71,8 @@ function Home() {
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button asChild variant="brand" size="lg" className="shadow-brand hover:-translate-y-0.5">
-                  <a href={releaseUrl} target="_blank" rel="noreferrer">
-                    Get extension
+                  <a href={chromeWebStoreUrl} target="_blank" rel="noreferrer">
+                    Add to Chrome
                   </a>
                 </Button>
                 <Button asChild variant="outline" size="lg">
@@ -210,7 +210,7 @@ function Home() {
               <h2 className="mt-4 text-4xl leading-[1.02] font-bold tracking-[-0.035em] text-white sm:text-5xl">Bring better context to the decision.</h2>
             </div>
             <Button asChild size="lg" className="border-white bg-white text-ink hover:-translate-y-0.5 hover:bg-white/90 hover:text-ink">
-              <a href={releaseUrl} target="_blank" rel="noreferrer">Get extension</a>
+              <a href={chromeWebStoreUrl} target="_blank" rel="noreferrer">Get it on Chrome Web Store</a>
             </Button>
           </div>
         </section>

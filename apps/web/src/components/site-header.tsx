@@ -13,8 +13,8 @@ import {
   SheetTrigger,
 } from '#/components/ui/sheet'
 
-export const releaseUrl =
-  'https://github.com/montasim/MulaLens/releases/latest'
+export const chromeWebStoreUrl =
+  'https://chromewebstore.google.com/detail/MulaLens/fchnnoakpkkefkpbcliooalddncffedo'
 
 const links = [
   { href: '#inside', label: 'What you get' },
@@ -44,8 +44,8 @@ export function SiteHeader() {
         <div className="ml-auto flex items-center gap-2 md:ml-0">
           <ThemeToggle />
           <Button asChild variant="brand" className="hidden shadow-brand md:inline-flex">
-            <a href={releaseUrl} target="_blank" rel="noreferrer">
-              Get extension
+            <a href={chromeWebStoreUrl} target="_blank" rel="noreferrer">
+              Add to Chrome
             </a>
           </Button>
           <Sheet>
@@ -72,8 +72,8 @@ export function SiteHeader() {
               </nav>
               <div className="mt-auto p-4">
                 <Button asChild variant="brand" className="w-full">
-                  <a href={releaseUrl} target="_blank" rel="noreferrer">
-                    Get extension
+                  <a href={chromeWebStoreUrl} target="_blank" rel="noreferrer">
+                    Add to Chrome
                   </a>
                 </Button>
               </div>

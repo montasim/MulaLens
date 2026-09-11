@@ -12,7 +12,7 @@ A Chrome extension that turns [Deshi Mula](https://deshimula.com/) company pages
 
 ![MulaLens research panel showing company insights](./store-assets/mulalens-1280x800.png)
 
-**[Download the latest release](https://github.com/montasim/MulaLens/releases/latest) · [Report an issue](https://github.com/montasim/MulaLens/issues) · [Request privacy help or deletion](mailto:montasimmamun@gmail.com?subject=MulaLens%20privacy%20or%20deletion%20request)**
+**[Install from the Chrome Web Store](https://chromewebstore.google.com/detail/MulaLens/fchnnoakpkkefkpbcliooalddncffedo) · [Report an issue](https://github.com/montasim/MulaLens/issues) · [Request privacy help or deletion](mailto:montasimmamun@gmail.com?subject=MulaLens%20privacy%20or%20deletion%20request)**
 
 ## Why MulaLens?
 
@@ -29,9 +29,15 @@ Company research often means copying an obfuscated name into several tabs, recon
 
 Salary and workplace information may be community-submitted. Treat it as research input and verify material claims independently before making employment decisions.
 
-> **Project status:** Actively distributed through [GitHub release artifacts](https://github.com/montasim/MulaLens/releases/latest). Chrome Web Store submission instructions exist, but this README does not claim a published store listing.
+> **Project status:** Published on the [Chrome Web Store](https://chromewebstore.google.com/detail/MulaLens/fchnnoakpkkefkpbcliooalddncffedo). GitHub release artifacts remain available as a manual install option.
 
 ## Install
+
+### From the Chrome Web Store
+
+1. Open the [MulaLens listing](https://chromewebstore.google.com/detail/MulaLens/fchnnoakpkkefkpbcliooalddncffedo) in Chrome.
+2. Select **Add to Chrome**.
+3. Open or reload a page on [deshimula.com](https://deshimula.com/).
 
 ### From a GitHub release
 
@@ -140,11 +146,11 @@ The web app's `netlify.toml` builds and deploys `apps/web/dist/client`, matching
 
 Version tags matching `v*` trigger the [release workflow](./.github/workflows/release.yml). It installs locked dependencies, runs `pnpm check`, packages the unpacked extension, generates a SHA-256 checksum, and publishes both files to GitHub Releases.
 
-The release archive is intended for Chrome's **Load unpacked** flow. Verify the downloaded archive against `SHA256SUMS.txt`, keep the extracted directory in a stable location, and reload the extension after replacing files during an update. See [Chrome Web Store guidance](docs/CHROME_WEB_STORE.md) for the prepared submission path; no store availability is claimed.
+The release archive is intended for Chrome's **Load unpacked** flow. Verify the downloaded archive against `SHA256SUMS.txt`, keep the extracted directory in a stable location, and reload the extension after replacing files during an update. See [Chrome Web Store guidance](docs/CHROME_WEB_STORE.md) for the submission process behind the published listing.
 
 ## Project status and limitations
 
-- The extension is actively released through GitHub and is not claimed as published in the Chrome Web Store.
+- The extension is published on the [Chrome Web Store](https://chromewebstore.google.com/detail/MulaLens/fchnnoakpkkefkpbcliooalddncffedo); GitHub releases remain available for manual installs.
 - It operates only on `deshimula.com`; unrelated pages are outside its permission boundary.
 - Research, salary, workplace, and generated-answer availability depends on the hosted b4join API.
 - Community reports and salary ranges are unverified and may be incomplete, stale, or context-dependent.
