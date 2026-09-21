@@ -1,5 +1,9 @@
 # Chrome Web Store submission
 
+## Version 3.1.0 update
+
+Upload `release/MulaLens-v3.1.0-chrome-unpacked.zip` to the existing MulaLens item (`fchnnoakpkkefkpbcliooalddncffedo`) on the **Package** tab. Replace the summary and detailed description on **Store listing** with the text below, confirm the **Privacy practices** tab reflects the three supported sites and Ask behavior, then submit the update for review. The package version is `3.1.0`; do not create a separate store item.
+
 ## Store listing
 
 **Language:** English
@@ -8,31 +12,24 @@
 
 **Summary:**
 
-See company culture signals, reported salary ranges, workplace stories, and
-cited answers on Deshi Mula.
+Research companies on Deshi Mula, Beton Kemon, and TruCareer with workplace stories, salaries, jobs, and cited answers.
 
 **Detailed description:**
 
-MulaLens adds focused company research directly beside company
-entries on deshimula.com.
+MulaLens places company research beside listings and profiles on Deshi Mula, Beton Kemon, and TruCareer. Open MulaLens Analytics beside a company name to view its research panel.
 
-Use it to:
+Inside the panel you can:
 
-- reveal confirmed company names;
-- review workplace culture signals and community stories;
-- compare reported salary ranges and roles;
-- check sourced job and careers links; and
-- ask questions about the available evidence and receive answers with
-  citations.
+- review workplace signals and linked community stories;
+- compare reported salary ranges, roles, and current job links;
+- inspect the sources behind each company brief; and
+- ask a focused question and read a cited answer.
 
-The extension works only on deshimula.com. Company research is supplied by the
-b4join API. Salary and workplace information may be community-submitted and
-should be verified independently before making employment decisions.
+The toolbar popup helps you find a supported company site or open research for the current company. On Beton Kemon and TruCareer, the button appears only where a company record has been verified against the b4join research API. Not every company on those sites has a matching record yet.
 
-The Ask feature is optional. Before the first Ask request, the extension
-explains what will be stored and requires your consent.
+Salary and workplace information may be community-submitted. Check the original sources and confirm important claims directly. Ask is optional and requires a storage disclosure choice before the first question.
 
-**Category:** Productivity
+**Category:** Tools
 
 **Homepage URL:** https://github.com/montasim/MulaLens
 
@@ -61,12 +58,18 @@ Ready small promo tile:
 
 Show company research—including culture signals, workplace stories, reported
 salary evidence, jobs, and cited answers—beside company entries on
-deshimula.com.
+deshimula.com, betonkemon.com, and trucareer.co.
 
 **Permission justification — storage:**
 
 Stores only whether the user accepted the disclosure required before sending
 an Ask question. This prevents repeatedly requesting the same consent.
+
+**Permission justification — activeTab:**
+
+When the user opens the toolbar popup, checks the current tab URL to identify a
+supported company page and offer the appropriate research action. This access
+is temporary and does not read a list of previously visited pages.
 
 **Host permission justification — b4joinacompany.netlify.app:**
 
@@ -74,9 +77,9 @@ Allows the background service worker to request company records, workplace
 stories, salary evidence, job information, and cited answers from the b4join
 research API.
 
-**Content-script host justification — deshimula.com:**
+**Content-script host justification — deshimula.com, betonkemon.com, and trucareer.co:**
 
-Runs the extension only on deshimula.com so it can identify company entries
+Runs the extension only on these three company sites so it can identify company entries
 and render the associated research panel beside the page.
 
 **Remote code:** No. All executable extension code is packaged in the uploaded
@@ -84,11 +87,12 @@ ZIP. External sites open only after the user follows a link.
 
 **Data types to disclose:**
 
-- Website content: company names and identifiers found on deshimula.com.
-- Web history: the extension detects that the user is viewing a deshimula.com
-  page in order to run its single-purpose interface.
+- Website content: company names and identifiers found on the three supported sites.
 - User-generated content: company story-search terms and questions submitted
   through Ask.
+
+The toolbar checks only the active page URL after the user clicks the icon; it
+does not collect browsing history.
 
 Do not select personally identifiable information, health information,
 financial and payment information, authentication information, personal

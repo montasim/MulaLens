@@ -1,6 +1,6 @@
 # MulaLens
 
-A Chrome extension that turns [Deshi Mula](https://deshimula.com/) company pages into a focused research workspace with company identities, workplace signals, reported salaries, jobs, stories, and cited answers.
+A Chrome extension that turns [Deshi Mula](https://deshimula.com/), [Beton Kemon](https://www.betonkemon.com/), and [TruCareer](https://trucareer.co/) company pages into a focused research workspace with company identities, workplace signals, reported salaries, jobs, stories, and cited answers.
 
 <p>
   <a href="https://github.com/montasim/MulaLens/actions/workflows/release.yml"><img alt="Release workflow" src="https://github.com/montasim/MulaLens/actions/workflows/release.yml/badge.svg"></a>
@@ -16,7 +16,7 @@ A Chrome extension that turns [Deshi Mula](https://deshimula.com/) company pages
 
 ## Why MulaLens?
 
-Company research often means copying an obfuscated name into several tabs, reconciling inconsistent identities, and separating community reports from verified facts. The extension keeps that workflow beside the Deshi Mula page, returns source-linked evidence from one backend boundary, and labels salary and workplace signals as research inputs rather than company policy.
+Company research often means copying an obfuscated name into several tabs, reconciling inconsistent identities, and separating community reports from verified facts. The extension keeps that workflow beside the company page, returns source-linked evidence from one backend boundary, and labels salary and workplace signals as research inputs rather than company policy.
 
 ## Features
 
@@ -25,7 +25,7 @@ Company research often means copying an obfuscated name into several tabs, recon
 - Surfaces culture signals, community workplace stories, salary evidence, roles, and job links.
 - Searches company stories and answers questions against available evidence with citations.
 - Keeps the extension thin: company research and generated answers come from the b4join API.
-- Runs only on `deshimula.com` and requests only the permissions required for its single purpose.
+- Runs on `deshimula.com`, `betonkemon.com`, and `trucareer.co` and requests only the permissions required for its single purpose.
 
 Salary and workplace information may be community-submitted. Treat it as research input and verify material claims independently before making employment decisions.
 
@@ -37,7 +37,7 @@ Salary and workplace information may be community-submitted. Treat it as researc
 
 1. Open the [MulaLens listing](https://chromewebstore.google.com/detail/MulaLens/fchnnoakpkkefkpbcliooalddncffedo) in Chrome.
 2. Select **Add to Chrome**.
-3. Open or reload a page on [deshimula.com](https://deshimula.com/).
+3. Click the MulaLens toolbar icon for the next step, or open or reload a page on [Deshi Mula](https://deshimula.com/), [Beton Kemon](https://www.betonkemon.com/), or [TruCareer](https://trucareer.co/).
 
 ### From a GitHub release
 
@@ -46,7 +46,7 @@ Salary and workplace information may be community-submitted. Treat it as researc
 3. Open `chrome://extensions` in Chrome.
 4. Enable **Developer mode**.
 5. Select **Load unpacked** and choose the extracted directory containing `manifest.json`.
-6. Open or reload a page on [deshimula.com](https://deshimula.com/).
+6. Open or reload a page on [Deshi Mula](https://deshimula.com/), [Beton Kemon](https://www.betonkemon.com/), or [TruCareer](https://trucareer.co/).
 
 ### Build from source
 
@@ -59,7 +59,7 @@ pnpm install --frozen-lockfile
 pnpm check
 ```
 
-Load `dist/extension/` as an unpacked extension, then reload any open Deshi Mula tabs.
+Load `dist/extension/` as an unpacked extension, then reload any open Deshi Mula, Beton Kemon, or TruCareer tabs.
 The extension has a single Chrome Manifest V3 target, so the build is intentionally
 flat: `manifest.json` is written to `dist/extension/manifest.json`, with no
 `.output/chrome-mv3/` intermediate directory.
@@ -67,7 +67,7 @@ flat: `manifest.json` is written to `dist/extension/manifest.json`, with no
 ## How it works
 
 ```text
-deshimula.com
+deshimula.com / betonkemon.com / trucareer.co
     │ company links
     ▼
 Content script ──typed message──► Background API bridge
@@ -77,29 +77,32 @@ Content script ──typed message──► Background API bridge
 Browser UI                         b4join API
 ```
 
-The content script discovers canonical company links and renders the interface. The background service worker is the only extension component that calls `https://b4joinacompany.netlify.app/api/v1/extension`. The backend owns company search, jobs, salary evidence, generated answers, persistence, and quotas; no raw research dataset or API key is packaged in the extension.
+The content script discovers company links and renders the interface. On Beton Kemon it first checks each identifier against the API and shows Research only for confirmed records; two known differing site identifiers are mapped explicitly. On TruCareer it derives a candidate slug from the visible company name and checks that the API record's name matches before showing a button. The background service worker is the only extension component that calls `https://b4joinacompany.netlify.app/api/v1/extension`. The backend owns company search, jobs, salary evidence, generated answers, persistence, and quotas; no raw research dataset or API key is packaged in the extension.
 
 See the [architecture documentation](./docs/ARCHITECTURE.md) for the full boundary.
 
 ## Using the research panel
 
-1. Open a company page or listing on Deshi Mula after installing the extension.
-2. Use the injected company badge to open the research panel.
-3. Review identity links, workplace signals, salary evidence, jobs, and related stories returned for that company.
+1. Click the MulaLens toolbar icon. Outside the supported sites, it links to the three company sites.
+2. On a company profile or listing, select **MulaLens Analytics** to open the panel.
+3. On Beton Kemon and TruCareer, the button appears only when MulaLens has a matching company record. Review identity links, workplace signals, salary evidence, jobs, and related stories returned for that company.
 4. Submit a story search or an Ask question only after reviewing the retention disclosure.
 5. Follow cited source links and independently verify consequential claims before acting on them.
 
-If the panel does not appear, reload the Deshi Mula tab after installing or updating the extension. If the panel loads without research results, check that the hosted b4join API is reachable; the browser package does not contain an offline copy of the research dataset.
+If the panel does not appear, reload the company tab after installing or updating the extension. If the panel loads without research results, check that the hosted b4join API is reachable; the browser package does not contain an offline copy of the research dataset.
 
 ## Permissions and privacy
 
 | Permission | Why it is needed |
 | --- | --- |
 | `storage` | Remembers whether the user accepted the disclosure shown before the first Ask request |
+| `activeTab` | Lets the toolbar popup identify the current supported company page when you click the extension |
 | `https://deshimula.com/*` | Finds company entries and renders the research panel on Deshi Mula |
+| `https://betonkemon.com/*`, `https://www.betonkemon.com/*` | Finds supported company entries and renders the research panel on Beton Kemon |
+| `https://trucareer.co/*`, `https://www.trucareer.co/*` | Reads visible company names, checks matches, and renders the research panel on TruCareer |
 | `https://b4joinacompany.netlify.app/*` | Retrieves company research and submits explicit story searches or Ask questions |
 
-The extension does not request an account, read browsing history outside Deshi Mula, or inject remote executable code. Questions are sent only when the user submits the Ask form and accepts its retention disclosure. Privacy questions and deletion requests use the direct private email process in the policy; no Chrome Web Store listing is required.
+The extension does not request an account, collect browsing history, or inject remote executable code. Questions are sent only when the user submits the Ask form and accepts its retention disclosure. Privacy questions and deletion requests use the direct private email process in the policy; no Chrome Web Store listing is required.
 
 Read the complete [privacy policy](./PRIVACY.md).
 
@@ -151,7 +154,7 @@ The release archive is intended for Chrome's **Load unpacked** flow. Verify the 
 ## Project status and limitations
 
 - The extension is published on the [Chrome Web Store](https://chromewebstore.google.com/detail/MulaLens/fchnnoakpkkefkpbcliooalddncffedo); GitHub releases remain available for manual installs.
-- It operates only on `deshimula.com`; unrelated pages are outside its permission boundary.
+- It operates only on `deshimula.com`, `betonkemon.com`, and `trucareer.co`; unrelated pages are outside its permission boundary.
 - Research, salary, workplace, and generated-answer availability depends on the hosted b4join API.
 - Community reports and salary ranges are unverified and may be incomplete, stale, or context-dependent.
 - Generated answers can be wrong; citations should be opened and consequential claims independently checked.

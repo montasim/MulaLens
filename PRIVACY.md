@@ -1,24 +1,28 @@
 # Privacy Policy for MulaLens
 
-Last updated: August 4, 2026
+Last updated: September 21, 2026
 
 MulaLens adds company research to pages on
-[deshimula.com](https://deshimula.com/). This policy explains the information
+[deshimula.com](https://deshimula.com/) and
+[betonkemon.com](https://www.betonkemon.com/), and
+[trucareer.co](https://trucareer.co/). This policy explains the information
 the extension handles, why it is needed, and where it is sent.
 
 ## Information the extension handles
 
 The extension handles:
 
-- company names and identifiers found on the Deshi Mula page you are viewing;
+- company names and identifiers found on the supported company page you are viewing;
 - company story-search terms you explicitly enter;
 - questions you explicitly submit through the **Ask the evidence** feature; and
 - your local choice to accept the Ask retention disclosure.
 
 The extension does not request your name, email address, contacts, precise
 location, authentication credentials, financial information, or health
-information. It does not read your browsing history outside deshimula.com and
-does not sell user data or use it for advertising.
+information. It does not collect browsing history. When you click the toolbar
+icon, it checks the current tab URL to choose the appropriate action. Content
+scripts run only on the three supported sites. MulaLens does not sell user data
+or use it for advertising.
 
 ## How information is used
 
@@ -32,13 +36,14 @@ Questions are sent only when you submit the Ask form. Ask questions are used
 to search the available company evidence and produce a cited answer.
 
 These uses are limited to providing the extension's single purpose: showing
-company research beside Deshi Mula.
+company research beside Deshi Mula, Beton Kemon, and TruCareer.
 
 ## Storage and retention
 
 Chrome local storage keeps only whether you accepted the Ask retention
-disclosure. You can remove this preference by removing the extension or
-clearing the extension's stored data.
+disclosure. You can reset this preference in the MulaLens toolbar popup, by
+removing the extension, or by clearing the extension's stored data. Resetting
+the preference does not delete questions already stored by b4join.
 
 Before the first Ask request, the extension requires you to affirmatively
 accept a disclosure that b4join may store the question, cited excerpts,
@@ -65,8 +70,9 @@ support link; the extension does not load SupportKori code in the page.
 ## Security
 
 All information sent by the extension is transmitted over HTTPS. The
-extension requests only Chrome local storage access and access to the b4join
-API needed for its features.
+extension requests Chrome local storage access, temporary access to the
+active tab when you click the toolbar icon, and access to the b4join API
+needed for its features.
 
 ## Limited Use
 

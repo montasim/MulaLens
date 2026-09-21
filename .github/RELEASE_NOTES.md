@@ -1,28 +1,20 @@
-## What’s new in v3.0.6
+## What’s new in v3.1.0
 
-- Reworked the company panel around three self-explanatory views: **Insights**, **Pay & roles**, and **Stories**.
-- Put company-specific culture signals, reported work setup, salary evidence, and personalized research questions in a clearer evidence-first hierarchy.
-- Removed repeated summary content and moved cited Ask into the relevant question flow.
-- Added compact sentiment and salary visualizations without hiding the underlying story counts or source boundaries.
-- Improved keyboard and screen-reader behavior for tabs, questions, source links, and panel controls.
-- Fixed masked company-name decoding for names such as `Expre$s Le@ther Products Ltd`, including ambiguous masks resolved from the canonical company slug.
-- Refined the extension description, action title, loading states, and production evidence status language.
+- Added MulaLens Analytics buttons to supported company listings and profiles on Beton Kemon and TruCareer, alongside Deshi Mula.
+- Checks Beton Kemon identifiers and TruCareer company names against the b4join research API before showing a button. Companies without a verified match are left alone.
+- Opens the same Insights, Pay & roles, Stories, and cited Ask panel on all three supported sites.
+- Simplified the toolbar popup so new users can choose a company site or open research for the current company.
+- Added the SupportKori control to the popup and improved the Ask panel’s consent copy and bottom footer layout.
+- Fixed duplicate and misplaced buttons found during live browser checks.
 
-The release keeps the existing minimal permissions: Chrome storage and access only to the production b4join API host.
+The extension requests access only to Deshi Mula, Beton Kemon, TruCareer, Chrome local storage, the current tab when the toolbar is clicked, and the b4join research API.
 
 ## Install in Chrome
 
 1. Download the Chrome ZIP and `SHA256SUMS.txt` attached to this release.
-2. Place both files in the same folder and verify the archive:
-
-   ```bash
-   sha256sum --check SHA256SUMS.txt
-   ```
-
+2. Place both files in the same folder and verify the archive with `sha256sum --check SHA256SUMS.txt`.
 3. Extract the ZIP to a permanent folder.
-4. Open `chrome://extensions` in Chrome 120 or later.
-5. Enable **Developer mode**.
-6. Select **Load unpacked** and choose the extracted folder containing `manifest.json`.
-7. Reload any deshimula.com tabs that were already open.
+4. Open `chrome://extensions`, enable **Developer mode**, and choose **Load unpacked**.
+5. Select the extracted folder containing `manifest.json`, then reload any already-open supported company site tabs.
 
-Chrome loads MulaLens from the extracted folder, so do not delete that folder while the extension is installed. GitHub installations do not update automatically; download, verify, and load each newer release when one becomes available.
+GitHub installations do not update automatically. The Chrome Web Store listing is the automatic-update option after this version is reviewed and published.
