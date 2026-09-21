@@ -1,9 +1,9 @@
 {
   "name": "@mulalens/extension",
-  "version": "3.0.7",
+  "version": "3.1.0",
   "private": true,
   "type": "module",
-  "description": "Manifest V3 research companion for Deshi Mula.",
+  "description": "Manifest V3 research companion for Deshi Mula, Beton Kemon, and TruCareer.",
   "scripts": {
     "build": "tsx scripts/build.ts",
     "check": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",

@@ -1,12 +1,19 @@
 {
   "manifest_version": 3,
   "name": "MulaLens",
-  "version": "3.0.7",
-  "description": "See company culture signals, reported salary ranges, workplace stories, and cited answers on Deshi Mula.",
-  "permissions": ["storage"],
+  "version": "3.1.0",
+  "description": "Research companies on Deshi Mula, Beton Kemon, and TruCareer with workplace stories, salaries, jobs, and cited answers.",
+  "permissions": ["storage", "activeTab"],
   "host_permissions": ["https://b4joinacompany.netlify.app/*"],
+  "web_accessible_resources": [
+    {
+      "resources": ["media/logo-32.png"],
+      "matches": ["https://deshimula.com/*", "https://betonkemon.com/*", "https://www.betonkemon.com/*", "https://trucareer.co/*", "https://www.trucareer.co/*"]
+    }
+  ],
   "action": {
-    "default_title": "Open company insights",
+    "default_title": "MulaLens — find your next step",
+    "default_popup": "popup.html",
     "default_icon": {
       "16": "media/logo-16.png",
       "32": "media/logo-32.png",
@@ -26,7 +33,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://deshimula.com/*"],
+      "matches": ["https://deshimula.com/*", "https://betonkemon.com/*", "https://www.betonkemon.com/*", "https://trucareer.co/*", "https://www.trucareer.co/*"],
       "js": ["content.js"],
       "css": ["styles.css"],
       "run_at": "document_idle"

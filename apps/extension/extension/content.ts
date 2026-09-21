@@ -6,7 +6,7 @@ import {
   JobsResponse,
   StorySearchResponse,
 } from '../src/contracts';
-import { decodeLeetText, escapeHtml, slugFromCompanyUrl } from '../src/text';
+import { betonCompanySlug, companyNamesMatch, decodeLeetText, escapeHtml, researchSlugForBeton, slugFromCompanyUrl, trucareerCandidateSlug, trucareerCompanyId } from '../src/text';
 
 const SUPPORT_URL = 'https://www.supportkori.com/montasim';
 const B4JOIN_URL = 'https://b4joinacompany.netlify.app';
@@ -34,6 +34,7 @@ const brandIcon = `
 const searchIcon = icon(
   '<circle cx="11" cy="11" r="6"></circle><path d="m16 16 4 4"></path>',
 );
+const triggerLogo = `<img src="${chrome.runtime.getURL('media/logo-32.png')}" alt="" />`;
 const externalIcon = icon(
   '<path d="M14 5h5v5"></path><path d="m19 5-8 8"></path><path d="M17 13v6H5V7h6"></path>',
 );
@@ -116,6 +117,8 @@ class ResearchPanel {
   private jobs: JobsResponse | undefined;
   private consentedToAiRetention = false;
   private requestVersion = 0;
+  private storyVersion = 0;
+  private askVersion = 0;
   private storyTimer?: number;
 
   constructor() {
@@ -160,10 +163,17 @@ class ResearchPanel {
   async open(identity: Identity) {
     this.requestVersion += 1;
     const version = this.requestVersion;
+    this.storyVersion += 1;
+    this.askVersion += 1;
     this.active = identity;
     this.company = undefined;
     this.jobs = undefined;
-    this.consentedToAiRetention = await send<boolean>({ type: 'consent:get' });
+    try {
+      this.consentedToAiRetention = (await send<boolean>({ type: 'consent:get' })) === true;
+    } catch {
+      this.consentedToAiRetention = false;
+    }
+    if (version !== this.requestVersion) return;
     this.required<HTMLElement>('#ml-panel-company').textContent =
       decodeLeetText(identity.sourceName || 'Company', identity.slug);
     this.select('brief');
@@ -176,52 +186,46 @@ class ResearchPanel {
     document.documentElement.classList.add('ml-research-open');
     this.required<HTMLButtonElement>('[data-close]').focus();
 
-    const companyTask = api<CompanyResearch>({
+    void api<CompanyResearch>({
       method: 'GET',
       path: `/company?slug=${encodeURIComponent(identity.slug)}`,
+    }).then((company) => {
+      if (version !== this.requestVersion) return;
+      this.company = company;
+      this.required<HTMLElement>('#ml-panel-company').textContent = decodeLeetText(company.name, company.slug);
+      this.required<HTMLElement>('[data-snapshot]').textContent = `Evidence updated ${company.snapshotDate}`;
+      this.renderBrief(company);
+    }, (error) => {
+      if (version !== this.requestVersion) return;
+      this.required<HTMLElement>('[data-snapshot]').textContent = 'Research unavailable';
+      this.renderError('brief', error);
     });
-    const storiesTask = api<StorySearchResponse>({
+    void api<StorySearchResponse>({
       method: 'GET',
       path: `/stories?company=${encodeURIComponent(identity.slug)}&limit=20`,
+    }).then((stories) => {
+      if (version === this.requestVersion) this.renderStories(stories);
+    }, (error) => {
+      if (version === this.requestVersion) this.renderError('stories', error);
     });
-    const jobsTask = api<JobsResponse>({
+    void api<JobsResponse>({
       method: 'GET',
       path: `/jobs?company=${encodeURIComponent(identity.slug)}`,
+    }).then((jobs) => {
+      if (version !== this.requestVersion) return;
+      this.jobs = jobs;
+      this.renderJobs(jobs);
+      if (this.company) this.renderBrief(this.company);
+    }, (error) => {
+      if (version === this.requestVersion) this.renderError('jobs', error);
     });
-    const [company, stories, jobs] = await Promise.allSettled([
-      companyTask,
-      storiesTask,
-      jobsTask,
-    ]);
-    if (version !== this.requestVersion) return;
-
-    if (company.status === 'fulfilled') {
-      this.company = company.value;
-      this.required<HTMLElement>('#ml-panel-company').textContent =
-        decodeLeetText(company.value.name, company.value.slug);
-      this.required<HTMLElement>('[data-snapshot]').textContent =
-        `Evidence updated ${company.value.snapshotDate}`;
-    }
-    if (jobs.status === 'fulfilled') this.jobs = jobs.value;
-
-    if (company.status === 'fulfilled') this.renderBrief(company.value);
-    else this.renderError('brief', company.reason);
-
-    if (stories.status === 'fulfilled') {
-      this.renderStories(stories.value);
-    } else {
-      this.renderError('stories', stories.reason);
-    }
-
-    if (jobs.status === 'fulfilled') {
-      this.renderJobs(jobs.value);
-    } else {
-      this.renderError('jobs', jobs.reason);
-    }
   }
 
   close() {
     this.requestVersion += 1;
+    this.storyVersion += 1;
+    this.askVersion += 1;
+    window.clearTimeout(this.storyTimer);
     this.panel.classList.remove('is-open');
     this.panel.setAttribute('aria-hidden', 'true');
     this.backdrop.classList.remove('is-open');
@@ -239,6 +243,19 @@ class ResearchPanel {
     this.root.querySelectorAll<HTMLButtonElement>('[data-tab]').forEach((button) =>
       button.addEventListener('click', () => this.select(button.dataset.tab || 'brief')),
     );
+    this.required('[role="tablist"]').addEventListener('keydown', (event) => {
+      const key = (event as KeyboardEvent).key;
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(key)) return;
+      const tabs = [...this.root.querySelectorAll<HTMLButtonElement>('[data-tab]')];
+      const selected = tabs.findIndex((tab) => tab.classList.contains('is-active'));
+      const next = key === 'Home' ? 0 : key === 'End' ? tabs.length - 1
+        : (selected + (key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+      const target = tabs[next];
+      if (!target) return;
+      event.preventDefault();
+      this.select(target.dataset.tab || 'brief');
+      target.focus();
+    });
     this.required('[data-sources]').addEventListener('click', (event) => {
       event.preventDefault();
       this.select('brief');
@@ -289,7 +306,7 @@ class ResearchPanel {
   private renderLoading() {
     (['brief', 'stories', 'jobs'] as const).forEach((view) => {
       this.required<HTMLElement>(`[data-view="${view}"]`).innerHTML =
-        '<div class="ml-state"><span class="ml-spinner"></span><strong>Reading published reports</strong><p>Building a company-specific view from the available evidence.</p></div>';
+        '<div class="ml-state" role="status"><span class="ml-spinner"></span><strong>Reading published reports</strong><p>Building a company-specific view from the available evidence.</p></div>';
     });
     this.required<HTMLElement>('[data-view="ask"]').innerHTML = '';
     this.required<HTMLElement>('[data-snapshot]').textContent = 'Loading published evidence';
@@ -298,11 +315,42 @@ class ResearchPanel {
   private renderError(view: string, reason: unknown) {
     const message = reason instanceof Error ? reason.message : 'Research is unavailable.';
     this.required<HTMLElement>(`[data-view="${view}"]`).innerHTML = `
-      <div class="ml-state ml-state--error">
+      <div class="ml-state ml-state--error" role="alert">
         <strong>This section is unavailable</strong>
         <p>${escapeHtml(message)}</p>
-        <small>The extension does not substitute stale or guessed data.</small>
+        <button class="ml-retry" type="button">Try again</button>
       </div>`;
+    this.required<HTMLElement>(`[data-view="${view}"]`).querySelector<HTMLButtonElement>('.ml-retry')
+      ?.addEventListener('click', () => void this.retry(view));
+  }
+
+  private async retry(view: string) {
+    if (!this.active) return;
+    const version = this.requestVersion;
+    const slug = this.active.slug;
+    this.required<HTMLElement>(`[data-view="${view}"]`).innerHTML =
+      '<div class="ml-state" role="status"><span class="ml-spinner"></span><strong>Trying again</strong></div>';
+    try {
+      if (view === 'brief') {
+        const company = await api<CompanyResearch>({ method: 'GET', path: `/company?slug=${encodeURIComponent(slug)}` });
+        if (version !== this.requestVersion) return;
+        this.company = company;
+        this.required<HTMLElement>('#ml-panel-company').textContent = decodeLeetText(company.name, company.slug);
+        this.required<HTMLElement>('[data-snapshot]').textContent = `Evidence updated ${company.snapshotDate}`;
+        this.renderBrief(company);
+      } else if (view === 'stories') {
+        const stories = await api<StorySearchResponse>({ method: 'GET', path: `/stories?company=${encodeURIComponent(slug)}&limit=20` });
+        if (version === this.requestVersion) this.renderStories(stories);
+      } else if (view === 'jobs') {
+        const jobs = await api<JobsResponse>({ method: 'GET', path: `/jobs?company=${encodeURIComponent(slug)}` });
+        if (version !== this.requestVersion) return;
+        this.jobs = jobs;
+        this.renderJobs(jobs);
+        if (this.company) this.renderBrief(this.company);
+      }
+    } catch (error) {
+      if (version === this.requestVersion) this.renderError(view, error);
+    }
   }
 
   private openAsk(question = '') {
@@ -405,9 +453,8 @@ class ResearchPanel {
 
     this.required<HTMLElement>('[data-view="brief"]').innerHTML = `
       <section class="ml-intro">
-        <p class="ml-eyebrow">Before you join</p>
-        <h3>Know what employees report before you join.</h3>
-        <p>A quick, company-specific read from ${company.metrics.stories} published workplace ${company.metrics.stories === 1 ? 'story' : 'stories'}.</p>
+        <h3>Start with the evidence for ${escapeHtml(decodeLeetText(company.name, company.slug))}.</h3>
+        <p>Select Culture or Pay below to inspect details. This snapshot covers ${company.metrics.stories} workplace ${company.metrics.stories === 1 ? 'story' : 'stories'} through ${escapeHtml(company.snapshotDate)}; Deshi Mula may show newer reports.</p>
       </section>
 
       <section class="ml-inside-view" aria-labelledby="ml-inside-view-title">
@@ -444,10 +491,10 @@ class ResearchPanel {
 
       <section class="ml-questions">
         <div class="ml-section-heading">
-          <div><span>Interview prep</span><h3>Questions worth asking</h3></div>
+          <div><span>Interview prep</span><h3>Questions to verify</h3></div>
           <strong>${questions.length}</strong>
         </div>
-        <p class="ml-section-copy">Built from themes that repeat in this company’s stories and comments.</p>
+        <p class="ml-section-copy">Search the published stories for clues, then confirm missing details with the company.</p>
         <div class="ml-question-list">
           ${primaryQuestions || '<p class="ml-empty-row">No repeated theme had enough evidence to create a company-specific question.</p>'}
           ${
@@ -522,12 +569,15 @@ class ResearchPanel {
   }
 
   private scheduleStorySearch() {
+    this.storyVersion += 1;
     window.clearTimeout(this.storyTimer);
     this.storyTimer = window.setTimeout(() => void this.searchStories(), 260);
   }
 
   private async searchStories() {
     if (!this.active) return;
+    const version = ++this.storyVersion;
+    const companySlug = this.active.slug;
     const query =
       this.root.querySelector<HTMLInputElement>('[data-story-search]')?.value.trim() || '';
     const vibe =
@@ -537,11 +587,14 @@ class ResearchPanel {
     try {
       const response = await api<StorySearchResponse>({
         method: 'GET',
-        path: `/stories?company=${encodeURIComponent(this.active.slug)}&q=${encodeURIComponent(query)}&vibe=${encodeURIComponent(vibe)}&limit=30`,
+        path: `/stories?company=${encodeURIComponent(companySlug)}&q=${encodeURIComponent(query)}&vibe=${encodeURIComponent(vibe)}&limit=30`,
       });
-      this.paintStories(response);
+      if (version === this.storyVersion && this.active?.slug === companySlug) this.paintStories(response);
     } catch (error) {
-      target.innerHTML = `<div class="ml-state ml-state--error"><strong>Search unavailable</strong><p>${escapeHtml(error instanceof Error ? error.message : String(error))}</p></div>`;
+      if (version === this.storyVersion) {
+        target.innerHTML = `<div class="ml-state ml-state--error" role="alert"><strong>Search unavailable</strong><p>${escapeHtml(error instanceof Error ? error.message : String(error))}</p><button class="ml-retry" type="button">Try again</button></div>`;
+        target.querySelector<HTMLButtonElement>('.ml-retry')?.addEventListener('click', () => void this.searchStories());
+      }
     }
   }
 
@@ -672,12 +725,12 @@ class ResearchPanel {
       <section class="ml-intro ml-intro--ask">
         <p class="ml-eyebrow">Ask the evidence</p>
         <h3>What do you want to know about ${escapeHtml(companyName)}?</h3>
-        <p>The answer searches ${storyCount || 'the available'} published ${storyCount === 1 ? 'story' : 'stories'} and comments, then links every supporting source.</p>
+        <p>Search ${storyCount || 'the available'} published ${storyCount === 1 ? 'story' : 'stories'} and comments. Some questions may have no answer in the available reports.</p>
       </section>
       <form class="ml-ask-form" data-ask-form>
         <label for="ml-research-question">Question to verify</label>
         <textarea id="ml-research-question" data-question rows="4" maxlength="800" placeholder="Example: How often is overtime mentioned?" aria-label="Ask about ${escapeHtml(companyName)}">${escapeHtml(prefill)}</textarea>
-        ${consented ? '' : `<label class="ml-consent"><input data-consent type="checkbox" /><span>Allow b4join to store this question, the cited excerpts, answer, and anonymous installation ID indefinitely.</span></label>`}
+        ${consented ? '' : `<label class="ml-consent"><input data-consent type="checkbox" /><span>I agree b4join may keep my question, cited excerpts, answer, and anonymous installation ID indefinitely.</span></label>`}
         <button class="ml-primary ml-primary--wide" type="submit"><span>Search company evidence</span>${chevronIcon}</button>
       </form>
       <div data-answer></div>
@@ -696,6 +749,8 @@ class ResearchPanel {
   private async ask(event: SubmitEvent) {
     event.preventDefault();
     if (!this.active) return;
+    const version = ++this.askVersion;
+    const companySlug = this.active.slug;
     const form = event.currentTarget as HTMLFormElement;
     const question = form.querySelector<HTMLTextAreaElement>('[data-question]')?.value.trim() || '';
     const consent = form.querySelector<HTMLInputElement>('[data-consent]');
@@ -708,21 +763,22 @@ class ResearchPanel {
       answer.innerHTML = '<p class="ml-inline-error">Confirm the storage choice before searching the evidence.</p>';
       return;
     }
-    if (consent) {
-      this.consentedToAiRetention = await send<boolean>({
-        type: 'consent:set',
-        consented: true,
-      });
-    }
     const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
     if (button) button.disabled = true;
     answer.innerHTML = '<div class="ml-state"><span class="ml-spinner"></span><strong>Reading the evidence</strong><p>This can take a few seconds.</p></div>';
     try {
+      if (consent) {
+        const saved = await send<boolean>({ type: 'consent:set', consented: true });
+        if (saved !== true) throw new Error('Could not save your storage choice. Try again.');
+        this.consentedToAiRetention = true;
+      }
+      if (version !== this.askVersion) return;
       const response = await api<AskResponse>({
         method: 'POST',
         path: '/ask',
-        body: { company: this.active.slug, question },
+        body: { company: companySlug, question },
       });
+      if (version !== this.askVersion || this.active?.slug !== companySlug) return;
       answer.innerHTML = `
         <article class="ml-answer">
           <div class="ml-source-label"><span>Answer from published reports</span><em>${response.citations.length} ${response.citations.length === 1 ? 'source' : 'sources'}</em></div>
@@ -736,7 +792,7 @@ class ResearchPanel {
         </article>`;
       consent?.closest('.ml-consent')?.remove();
     } catch (error) {
-      answer.innerHTML = `<div class="ml-state ml-state--error"><strong>Ask could not complete</strong><p>${escapeHtml(error instanceof Error ? error.message : String(error))}</p></div>`;
+      if (version === this.askVersion) answer.innerHTML = `<div class="ml-state ml-state--error"><strong>Ask could not complete</strong><p>${escapeHtml(error instanceof Error ? error.message : String(error))}</p></div>`;
     } finally {
       if (button) button.disabled = false;
     }
@@ -746,6 +802,136 @@ class ResearchPanel {
 let panel: ResearchPanel;
 const identities = new Map<string, Identity[]>();
 let scanTimer: number | undefined;
+let profileIdentity: Identity | undefined;
+const currentProfileIdentity = () => profileIdentity;
+const betonVerified = new Map<string, boolean>();
+const isBeton = ['betonkemon.com', 'www.betonkemon.com'].includes(location.hostname);
+const isTrucareer = ['trucareer.co', 'www.trucareer.co'].includes(location.hostname);
+const trucareerResolved = new Map<string, string | null>();
+const trucareerPending = new Map<string, Promise<string | null>>();
+
+const positionTrucareerButtons = () => {
+  for (const items of identities.values()) for (const identity of items) {
+    if (!identity.trigger.classList.contains('ml-research-trigger--trucareer-listing')) continue;
+    if (!identity.element.isConnected) {
+      identity.trigger.remove();
+      continue;
+    }
+    const row = identity.element.closest('a');
+    if (!row) continue;
+    const name = identity.element.getBoundingClientRect();
+    const bounds = row.getBoundingClientRect();
+    const narrow = bounds.width < 700;
+    const left = narrow || name.right + 170 > bounds.right
+      ? bounds.right - 174 : name.right + 12;
+    const top = narrow || name.right + 170 > bounds.right
+      ? bounds.bottom - 40 : name.top - 7;
+    identity.trigger.style.left = `${Math.max(bounds.left + 12, left)}px`;
+    identity.trigger.style.top = `${top}px`;
+    identity.trigger.hidden = bounds.bottom < 0 || bounds.top > innerHeight;
+  }
+};
+
+const makeTrigger = (identity: Identity) => {
+  const trigger = identity.trigger;
+  trigger.type = 'button';
+  trigger.className = 'ml-research-trigger';
+  trigger.dataset.mlUi = 'trigger';
+  trigger.setAttribute('aria-haspopup', 'dialog');
+  trigger.setAttribute('aria-expanded', 'false');
+  trigger.innerHTML = `${triggerLogo}<span>MulaLens Analytics</span>`;
+  trigger.addEventListener('click', (event) => {
+    if (!event.isTrusted) return;
+    event.preventDefault();
+    event.stopPropagation();
+    void panel.open(identity);
+  });
+};
+
+const verifyBetonSlugs = async (slugs: string[]): Promise<Set<string>> => {
+  const unknown = [...new Set(slugs)].filter((slug) => !betonVerified.has(slug));
+  if (unknown.length) {
+    const response = await api<{ items: CompanyResearch[] }>({
+      method: 'GET',
+      path: `/companies?slugs=${encodeURIComponent(unknown.join(','))}`,
+    });
+    const returned = new Set(response.items.map((company) => company.slug));
+    unknown.forEach((slug) => betonVerified.set(slug, returned.has(slug)));
+  }
+  return new Set(slugs.filter((slug) => betonVerified.get(slug)));
+};
+
+const resolveTrucareerName = (name: string): Promise<string | null> => {
+  const key = name.normalize('NFKC').trim();
+  if (trucareerResolved.has(key)) return Promise.resolve(trucareerResolved.get(key) ?? null);
+  const pending = trucareerPending.get(key);
+  if (pending) return pending;
+  const slug = trucareerCandidateSlug(key);
+  if (!slug) return Promise.resolve(null);
+  const request = api<{ items: CompanyResearch[] }>({
+    method: 'GET',
+    path: `/companies?slugs=${encodeURIComponent(slug)}`,
+  }).then(({ items }) => {
+    const match = items.find((company) => company.slug === slug &&
+      (companyNamesMatch(key, company.name) || companyNamesMatch(key, company.sourceName)));
+    const resolved = match?.slug ?? null;
+    trucareerResolved.set(key, resolved);
+    return resolved;
+  }).finally(() => { trucareerPending.delete(key); });
+  trucareerPending.set(key, request);
+  return request;
+};
+
+const discoverTrucareerProfile = async (): Promise<Identity | undefined> => {
+  const pageId = trucareerCompanyId(location.href);
+  const heading = document.querySelector<HTMLElement>('main h1');
+  if (!pageId || !heading) {
+    profileIdentity?.trigger.remove();
+    profileIdentity = undefined;
+    return undefined;
+  }
+  const sourceName = heading.textContent?.trim() ?? '';
+  if (profileIdentity?.element === heading && profileIdentity.sourceName === sourceName && profileIdentity.trigger.isConnected) return profileIdentity;
+  profileIdentity?.trigger.remove();
+  profileIdentity = undefined;
+  let slug: string | null;
+  try { slug = await resolveTrucareerName(sourceName); } catch { return undefined; }
+  if (!slug || trucareerCompanyId(location.href) !== pageId || !heading.isConnected || heading.textContent?.trim() !== sourceName) return undefined;
+  const current = currentProfileIdentity();
+  if (current?.element === heading && current.trigger.isConnected) return current;
+  const identity: Identity = { slug, sourceName, element: heading, trigger: document.createElement('button') };
+  makeTrigger(identity);
+  identity.trigger.classList.add('ml-research-trigger--trucareer-profile');
+  heading.insertAdjacentElement('afterend', identity.trigger);
+  profileIdentity = identity;
+  return identity;
+};
+
+const discoverTrucareerListings = async () => {
+  if (!['/', '/companies', '/companies/'].includes(location.pathname)) return;
+  const candidates = [...document.querySelectorAll<HTMLAnchorElement>('main a[href*="/company/"]')]
+    .map((anchor) => ({ anchor, pageId: trucareerCompanyId(anchor.href), name: anchor.querySelector<HTMLElement>('span.truncate.font-semibold') }))
+    .filter((item): item is { anchor: HTMLAnchorElement; pageId: string; name: HTMLElement } =>
+      Boolean(item.pageId && item.name && !item.name.dataset.mlCompanySlug && !item.anchor.closest('[data-ml-ui]')));
+  await Promise.all(candidates.map(async ({ anchor, name, pageId }) => {
+    const sourceName = name.textContent?.trim() ?? '';
+    let slug: string | null;
+    try { slug = await resolveTrucareerName(sourceName); } catch { return; }
+    if (!slug || !anchor.isConnected || !name.isConnected || name.dataset.mlCompanySlug ||
+      name.textContent?.trim() !== sourceName || trucareerCompanyId(anchor.href) !== pageId ||
+      !['/', '/companies', '/companies/'].includes(location.pathname)) return;
+    const identity: Identity = { slug, sourceName, element: name, trigger: document.createElement('button') };
+    makeTrigger(identity);
+    identity.trigger.classList.add('ml-research-trigger--trucareer-listing');
+    document.body.append(identity.trigger);
+    anchor.dataset.mlTrucareer = 'matched';
+    name.dataset.mlCompanySlug = slug;
+    const existing = identities.get(slug) || [];
+    existing.push(identity);
+    identities.set(slug, existing);
+    positionTrucareerButtons();
+  }));
+};
 
 const nameElementFor = (anchor: HTMLAnchorElement): HTMLElement | null => {
   const anchorText = anchor.textContent?.trim();
@@ -777,7 +963,7 @@ const discover = (): Identity[] => {
     const displayName = decodeLeetText(sourceName, slug);
     element.dataset.mlCompanySlug = slug;
     element.dataset.mlSourceName = sourceName;
-    element.textContent = displayName;
+    if (element.childElementCount === 0) element.textContent = displayName;
     if (displayName !== sourceName) {
       element.title = `Originally shown as ${sourceName}`;
     }
@@ -787,7 +973,7 @@ const discover = (): Identity[] => {
     trigger.dataset.mlUi = 'trigger';
     trigger.setAttribute('aria-haspopup', 'dialog');
     trigger.setAttribute('aria-expanded', 'false');
-    trigger.innerHTML = `${searchIcon}<span>Research</span>`;
+    trigger.innerHTML = `${triggerLogo}<span>MulaLens Analytics</span>`;
     const identity: Identity = {
       slug,
       sourceName,
@@ -800,15 +986,106 @@ const discover = (): Identity[] => {
       event.stopPropagation();
       void panel.open(identity);
     });
-    element.insertAdjacentElement('afterend', trigger);
+    const storyHeader = element.closest<HTMLElement>('.flex.items-start.justify-between');
+    const rightControls = storyHeader?.children[1];
+    if (rightControls instanceof HTMLElement && rightControls.classList.contains('md:flex')) {
+      trigger.classList.add('ml-research-trigger--card-end');
+      rightControls.insertAdjacentElement('beforebegin', trigger);
+    } else {
+      element.insertAdjacentElement('afterend', trigger);
+    }
     found.push(identity);
   });
   return found;
 };
 
+const discoverProfile = () => {
+  const slug = location.pathname.match(/^\/companies\/([^/]+)\/?$/)?.[1];
+  const heading = document.querySelector<HTMLElement>('main h1, h1');
+  if (!slug || !heading) {
+    profileIdentity = undefined;
+    return;
+  }
+  if (profileIdentity?.slug === slug && profileIdentity.element === heading) return;
+  profileIdentity?.trigger.remove();
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'ml-research-trigger';
+  trigger.dataset.mlUi = 'trigger';
+  trigger.setAttribute('aria-haspopup', 'dialog');
+  trigger.setAttribute('aria-expanded', 'false');
+  trigger.innerHTML = `${triggerLogo}<span>MulaLens Analytics</span>`;
+  profileIdentity = { slug, sourceName: heading.textContent?.trim() || slug, element: heading, trigger };
+  trigger.addEventListener('click', () => {
+    if (profileIdentity) void panel.open(profileIdentity);
+  });
+  heading.insertAdjacentElement('afterend', trigger);
+};
+
+const discoverBetonProfile = async (): Promise<Identity | undefined> => {
+  const pageSlug = betonCompanySlug(location.href);
+  const heading = document.querySelector<HTMLElement>('main h1, h1');
+  if (!pageSlug || !heading) {
+    profileIdentity?.trigger.remove();
+    profileIdentity = undefined;
+    return undefined;
+  }
+  const slug = researchSlugForBeton(pageSlug);
+  const current = currentProfileIdentity();
+  if (current?.slug === slug && current.element === heading && current.trigger.isConnected) return current;
+  profileIdentity?.trigger.remove();
+  profileIdentity = undefined;
+  let verified: Set<string>;
+  try {
+    verified = await verifyBetonSlugs([slug]);
+  } catch {
+    return undefined;
+  }
+  if (!verified.has(slug) || betonCompanySlug(location.href) !== pageSlug || !heading.isConnected) return undefined;
+  const resolved = currentProfileIdentity();
+  if (resolved?.slug === slug && resolved.element === heading && resolved.trigger.isConnected) return resolved;
+  const identity: Identity = { slug, sourceName: heading.textContent?.trim() || pageSlug, element: heading, trigger: document.createElement('button') };
+  makeTrigger(identity);
+  identity.trigger.classList.add('ml-research-trigger--beton-profile');
+  const header = heading.closest('section')?.previousElementSibling;
+  if (header instanceof HTMLElement && header.tagName === 'HEADER') header.append(identity.trigger);
+  else heading.insertAdjacentElement('afterend', identity.trigger);
+  profileIdentity = identity;
+  return identity;
+};
+
+const discoverBetonDirectory = async () => {
+  const candidates = [...document.querySelectorAll<HTMLAnchorElement>('li > a[href*="/c/"]')]
+    .map((anchor) => ({ anchor, pageSlug: betonCompanySlug(anchor.href), name: anchor.querySelector<HTMLElement>('div.truncate') }))
+    .filter((item): item is { anchor: HTMLAnchorElement; pageSlug: string; name: HTMLElement } => Boolean(item.pageSlug && item.name && !item.name.dataset.mlCompanySlug));
+  if (!candidates.length) return;
+  const slugs = candidates.map(({ pageSlug }) => researchSlugForBeton(pageSlug));
+  let verified: Set<string>;
+  try {
+    verified = await verifyBetonSlugs(slugs);
+  } catch {
+    return;
+  }
+  candidates.forEach(({ anchor, pageSlug, name }) => {
+    const slug = researchSlugForBeton(pageSlug);
+    if (!verified.has(slug) || !name.isConnected || name.dataset.mlCompanySlug) return;
+    const identity: Identity = { slug, sourceName: name.textContent?.trim() || pageSlug, element: name, trigger: document.createElement('button') };
+    makeTrigger(identity);
+    name.dataset.mlCompanySlug = slug;
+    const row = anchor.parentElement;
+    if (!row || row.tagName !== 'LI') return;
+    row.classList.add('ml-beton-directory-row');
+    identity.trigger.classList.add('ml-research-trigger--beton-directory');
+    row.append(identity.trigger);
+    const existing = identities.get(slug) || [];
+    existing.push(identity);
+    identities.set(slug, existing);
+  });
+};
+
 const hydrate = async (found: Identity[]) => {
   found.forEach((identity) => {
-    const existing = identities.get(identity.slug) || [];
+    const existing = (identities.get(identity.slug) || []).filter((item) => item.element.isConnected);
     existing.push(identity);
     identities.set(identity.slug, existing);
   });
@@ -821,7 +1098,9 @@ const hydrate = async (found: Identity[]) => {
     });
     response.items.forEach((company) => {
       (identities.get(company.slug) || []).forEach((identity) => {
-        identity.element.textContent = decodeLeetText(company.name, company.slug);
+        if (identity.element.isConnected && identity.element.childElementCount === 0) {
+          identity.element.textContent = decodeLeetText(company.name, company.slug);
+        }
         identity.element.title =
           company.name === company.sourceName
             ? ''
@@ -833,7 +1112,25 @@ const hydrate = async (found: Identity[]) => {
   }
 };
 
-const scan = () => void hydrate(discover());
+const scan = () => {
+  for (const [slug, items] of identities) {
+    const current = items.filter((item) => item.element.isConnected);
+    items.filter((item) => !item.element.isConnected).forEach((item) => item.trigger.remove());
+    if (current.length) identities.set(slug, current);
+    else identities.delete(slug);
+  }
+  if (isBeton) {
+    void discoverBetonProfile();
+    void discoverBetonDirectory();
+  } else if (isTrucareer) {
+    void discoverTrucareerProfile();
+    void discoverTrucareerListings();
+    positionTrucareerButtons();
+  } else {
+    discoverProfile();
+    void hydrate(discover());
+  }
+};
 const scheduleScan = () => {
   if (scanTimer !== undefined) return;
   scanTimer = window.setTimeout(() => {
@@ -844,7 +1141,39 @@ const scheduleScan = () => {
 
 const initialize = () => {
   panel = new ResearchPanel();
+  chrome.runtime.onMessage.addListener((message: { type?: string }, _sender, sendResponse) => {
+    if (message.type !== 'panel:open-current') return;
+    if (isBeton) {
+      void discoverBetonProfile().then((identity) => {
+        if (identity) {
+          void panel.open(identity);
+          sendResponse({ ok: true });
+        } else sendResponse({ ok: false, reason: 'not-found' });
+      });
+      return true;
+    }
+    if (isTrucareer) {
+      void discoverTrucareerProfile().then((identity) => {
+        if (identity) {
+          void panel.open(identity);
+          sendResponse({ ok: true });
+        } else sendResponse({ ok: false, reason: 'not-found' });
+      });
+      return true;
+    }
+    discoverProfile();
+    if (profileIdentity) {
+      void panel.open(profileIdentity);
+      sendResponse({ ok: true });
+    } else {
+      sendResponse({ ok: false });
+    }
+  });
   scan();
+  if (isTrucareer) {
+    window.addEventListener('scroll', positionTrucareerButtons, { passive: true });
+    window.addEventListener('resize', positionTrucareerButtons);
+  }
   new MutationObserver((mutations) => {
     if (
       mutations.some(

@@ -27,6 +27,7 @@ const api = async (request: ApiRequest): Promise<ApiResult> => {
     const response = await fetch(`${API_BASE_URL}${request.path}`, {
       method: request.method,
       headers,
+      signal: AbortSignal.timeout(15000),
       ...(request.method === 'POST'
         ? { body: JSON.stringify(request.body) }
         : {}),
@@ -41,11 +42,13 @@ const api = async (request: ApiRequest): Promise<ApiResult> => {
       };
     }
     return { ok: true, status: response.status, data };
-  } catch {
+  } catch (error) {
     return {
       ok: false,
       status: 0,
-      error: 'The b4join research API is currently unavailable.',
+      error: error instanceof DOMException && error.name === 'TimeoutError'
+        ? 'The research request timed out. Try again.'
+        : 'The b4join research API is currently unavailable.',
     };
   }
 };
@@ -61,8 +64,10 @@ chrome.runtime.onMessage.addListener(
         ? api(message.request)
         : message.type === 'consent:get'
           ? consent()
-          : updateConsent(message.consented);
-    void task.then(sendResponse);
+          : message.type === 'consent:set'
+            ? updateConsent(message.consented)
+            : Promise.resolve(null);
+    void task.then(sendResponse, () => sendResponse({ ok: false, error: 'Extension storage is unavailable.' }));
     return true;
   },
 );

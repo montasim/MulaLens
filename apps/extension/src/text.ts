@@ -85,11 +85,50 @@ export const decodeLeetText = (
 export const slugFromCompanyUrl = (value: string): string | null => {
   try {
     const url = new URL(value, 'https://deshimula.com');
+    if (url.origin !== 'https://deshimula.com') return null;
     const match = url.pathname.match(/^\/companies\/([^/?#]+)/);
     return match?.[1] ? decodeURIComponent(match[1]) : null;
   } catch {
     return null;
   }
+};
+
+export const betonCompanySlug = (value: string): string | null => {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || !['betonkemon.com', 'www.betonkemon.com'].includes(url.hostname)) return null;
+    const match = url.pathname.match(/^\/(?:en|bn)\/c\/([^/]+)\/?$/);
+    return match?.[1] ? decodeURIComponent(match[1]) : null;
+  } catch {
+    return null;
+  }
+};
+
+const BETON_ALIASES: Record<string, string> = {
+  technonext: 'technonext-ltd',
+  'brac-it-services-limited': 'brac-it',
+};
+
+export const researchSlugForBeton = (slug: string): string => BETON_ALIASES[slug] ?? slug;
+
+export const trucareerCompanyId = (value: string): string | null => {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'https:' || !['trucareer.co', 'www.trucareer.co'].includes(url.hostname)) return null;
+    return url.pathname.match(/^\/company\/([0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})\/?$/i)?.[1] ?? null;
+  } catch {
+    return null;
+  }
+};
+
+export const trucareerCandidateSlug = (name: string): string =>
+  name.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+export const companyNamesMatch = (visible: string, canonical: string): boolean => {
+  const normalize = (name: string) => name.normalize('NFKC').toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, '');
+  return Boolean(normalize(visible)) && normalize(visible) === normalize(canonical);
 };
 
 export const escapeHtml = (value: string): string =>

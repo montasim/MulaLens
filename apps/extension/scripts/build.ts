@@ -26,12 +26,22 @@ await Promise.all([
     target: 'chrome120',
     minify: true,
   }),
+  build({
+    entryPoints: [join(appRoot, 'extension/popup.ts')],
+    outfile: join(output, 'popup.js'),
+    bundle: true,
+    format: 'iife',
+    target: 'chrome120',
+    minify: true,
+  }),
 ]);
 
 await Promise.all(
   [
     'manifest.json',
     'styles.css',
+    'popup.html',
+    'popup.css',
     'media/logo-16.png',
     'media/logo-32.png',
     'media/logo-48.png',

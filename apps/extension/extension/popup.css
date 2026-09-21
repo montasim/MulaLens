@@ -1,0 +1,53 @@
+:root {
+  font-family: Aptos, "Segoe UI", sans-serif;
+  color: #17343a;
+  background: #fff;
+}
+* { box-sizing: border-box; }
+body { width: 320px; margin: 0; }
+main { padding: 20px; }
+header { display: flex; align-items: center; gap: 9px; color: #0e5f58; font-size: 13px; }
+header img { width: 28px; height: 28px; }
+header strong { flex: 1; }
+.popup-support {
+  width: 36px; height: 36px; display: grid; place-items: center;
+  border: 1px solid #d7e3e0; border-radius: 9px;
+  color: #9f5360; background: #fff; text-decoration: none;
+}
+.popup-support:hover { border-color: #b9cdca; color: #87424e; background: #fff5f6; }
+.popup-support:focus-visible, button:focus-visible, summary:focus-visible {
+  outline: 2px solid #0e5f58; outline-offset: 3px;
+}
+.popup-support svg { width: 17px; height: 17px; fill: currentColor; stroke: currentColor; stroke-width: 1.7; }
+h1 { margin: 20px 0 7px; font: 700 22px/1.2 Charter, Georgia, serif; }
+p { margin: 0; color: #405b61; font-size: 13px; line-height: 1.45; }
+button { cursor: pointer; }
+#primary:not(.site-choice) {
+  width: 100%; margin-top: 18px; padding: 11px 14px;
+  border: 0; border-radius: 9px; color: #fff; background: #147d72;
+  font: 700 13px/1.25 Aptos, "Segoe UI", sans-serif;
+}
+#primary:not(.site-choice):hover { background: #0e5f58; }
+.site-choice {
+  width: 100%; min-height: 42px; display: flex; align-items: center;
+  justify-content: space-between; padding: 9px 12px;
+  border: 1px solid #d7e3e0; border-radius: 8px;
+  color: #17343a; background: #fff;
+  font: 600 13px/1.2 Aptos, "Segoe UI", sans-serif; text-align: left;
+}
+.site-choice::after { content: "↗"; color: #526d72; font-size: 17px; line-height: 1; }
+.site-choice:hover { border-color: #9fc7c1; background: #eff8f6; }
+#primary.site-choice { margin-top: 18px; }
+.site-choice + .site-choice { margin-top: 7px; }
+.hint { margin-top: 10px; font-size: 11px; color: #526d72; }
+.hint:empty { display: none; }
+details { margin-top: 20px; padding-top: 12px; border-top: 1px solid #e5ecea; }
+details[hidden] { display: none; }
+summary { width: max-content; color: #526d72; font-size: 11px; cursor: pointer; }
+details p { margin-top: 10px; font-size: 11px; }
+#reset-consent {
+  margin-top: 9px; padding: 0; border: 0; color: #0e5f58;
+  background: transparent; font: 600 11px/1.4 Aptos, "Segoe UI", sans-serif;
+}
+#reset-consent:hover { text-decoration: underline; }
+button[hidden] { display: none; }

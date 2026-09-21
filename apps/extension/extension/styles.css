@@ -23,20 +23,24 @@ html.ml-research-open {
 }
 
 .ml-research-trigger {
-  width: auto !important;
-  min-height: 30px !important;
+  box-sizing: border-box !important;
+  width: max-content !important;
+  height: 32px !important;
+  min-height: 32px !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+  flex: 0 0 auto !important;
   gap: 6px !important;
   margin: 0 0 0 8px !important;
-  padding: 5px 10px !important;
+  padding: 6px 10px !important;
   border: 1px solid #9fc7c1 !important;
   border-radius: 7px !important;
   color: var(--ml-teal-dark) !important;
   background: #eff8f6 !important;
   box-shadow: none !important;
-  font: 700 12px/1.2 var(--ml-body) !important;
+  font: 700 12px/1 var(--ml-body) !important;
+  white-space: nowrap !important;
   vertical-align: middle !important;
   cursor: pointer !important;
   transition:
@@ -49,6 +53,54 @@ html.ml-research-open {
   background: var(--ml-mist) !important;
 }
 
+.ml-research-trigger--card-end {
+  flex-shrink: 0 !important;
+  margin-left: auto !important;
+  margin-right: 12px !important;
+}
+
+.ml-research-trigger--beton-profile {
+  margin: 0 !important;
+}
+
+.ml-research-trigger--trucareer-profile {
+  margin: 8px 0 0 !important;
+}
+
+.ml-research-trigger--trucareer-listing {
+  position: fixed !important;
+  z-index: 10 !important;
+  margin: 0 !important;
+}
+
+@media (max-width: 850px) {
+  a[data-ml-trucareer="matched"] {
+    padding-bottom: 48px !important;
+  }
+}
+
+.ml-beton-directory-row {
+  position: relative !important;
+}
+
+.ml-research-trigger--beton-directory {
+  margin: 8px 0 0 !important;
+}
+
+@media (min-width: 640px) {
+  .ml-beton-directory-row > a {
+    padding-bottom: 52px !important;
+  }
+
+  .ml-research-trigger--beton-directory {
+    position: absolute !important;
+    right: 16px !important;
+    bottom: 14px !important;
+    margin: 0 !important;
+    z-index: 1 !important;
+  }
+}
+
 .ml-research-trigger svg {
   width: 14px !important;
   height: 14px !important;
@@ -59,8 +111,31 @@ html.ml-research-open {
   stroke-width: 1.8 !important;
 }
 
+.ml-research-trigger img {
+  display: block !important;
+  width: 18px !important;
+  height: 18px !important;
+  flex: 0 0 18px !important;
+  border-radius: 4px !important;
+}
+
+.ml-research-trigger span {
+  font: inherit !important;
+  white-space: nowrap !important;
+}
+
 .ml-research-trigger[hidden] {
   display: none !important;
+}
+
+.ml-retry {
+  margin-top: 16px;
+  padding: 9px 14px;
+  border: 1px solid var(--ml-teal);
+  border-radius: 8px;
+  color: var(--ml-teal-dark);
+  background: var(--ml-paper);
+  cursor: pointer;
 }
 
 [data-ml-ui="research-root"] {
@@ -292,6 +367,10 @@ html.ml-research-open {
 
 .ml-panel.is-asking .ml-nav {
   display: none;
+}
+
+.ml-panel.is-asking {
+  grid-template-rows: auto minmax(0, 1fr) auto;
 }
 
 .ml-scroll {
@@ -1224,6 +1303,7 @@ button.ml-signal-row:hover {
   accent-color: var(--ml-teal);
 }
 
+
 .ml-answer {
   margin-top: 24px;
   padding: 16px;
@@ -1566,6 +1646,6 @@ button.ml-signal-row:hover {
   }
 
   .ml-spinner {
-    animation-duration: 1.8s;
+    animation: none;
   }
 }

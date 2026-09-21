@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="popup.css" />
+    <title>MulaLens</title>
+  </head>
+  <body>
+    <main>
+      <header>
+        <img src="media/logo-32.png" alt="" />
+        <strong>MulaLens</strong>
+        <a class="popup-support" href="https://www.supportkori.com/montasim" target="_blank" rel="noreferrer" aria-label="Support this project" title="Support this project">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z" /></svg>
+        </a>
+      </header>
+      <h1 id="title">Find your next step</h1>
+      <p id="description">Checking this page…</p>
+      <button id="primary" type="button" hidden></button>
+      <button id="other-site" class="secondary" type="button" hidden></button>
+      <button id="third-site" class="secondary" type="button" hidden></button>
+      <p id="hint" class="hint"></p>
+      <details id="privacy-settings" hidden>
+        <summary>Privacy settings</summary>
+        <p id="privacy-note">You allowed saved Ask questions. Resetting this choice does not delete past questions.</p>
+        <button id="reset-consent" type="button">Reset Ask choice</button>
+      </details>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>
