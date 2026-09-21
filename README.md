@@ -1,196 +1,82 @@
 # MulaLens
 
-A Chrome extension that turns [Deshi Mula](https://deshimula.com/), [Beton Kemon](https://www.betonkemon.com/), and [TruCareer](https://trucareer.co/) company pages into a focused research workspace with company identities, workplace signals, reported salaries, jobs, stories, and cited answers.
+MulaLens is a Chrome extension for researching companies while browsing [Deshi Mula](https://deshimula.com/), [Beton Kemon](https://www.betonkemon.com/), and [TruCareer](https://trucareer.co/). It places workplace stories, reported pay, jobs, source links, and cited answers beside supported company listings and profiles.
 
-<p>
-  <a href="https://github.com/montasim/MulaLens/actions/workflows/release.yml"><img alt="Release workflow" src="https://github.com/montasim/MulaLens/actions/workflows/release.yml/badge.svg"></a>
-  <a href="https://github.com/montasim/MulaLens/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/montasim/MulaLens"></a>
-  <img alt="Manifest V3" src="https://img.shields.io/badge/Chrome-Manifest_V3-4285F4?logo=googlechrome&logoColor=white">
-  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white">
-  <a href="https://www.supportkori.com/montasim"><img alt="Support on SupportKori" src="https://img.shields.io/badge/Support-SupportKori-FFDD00"></a>
-</p>
+**[Install from the Chrome Web Store](https://chromewebstore.google.com/detail/mulalens/fchnnoakpkkefkpbcliooalddncffedo) · [Report an issue](https://github.com/montasim/MulaLens/issues) · [Read the privacy policy](PRIVACY.md)**
 
-![MulaLens research panel showing company insights](./store-assets/mulalens-1280x800.png)
+![MulaLens insights panel on a Deshi Mula company page](store-assets/v3.1.0/01-deshimula-insights-1280x800.png)
 
-**[Install from the Chrome Web Store](https://chromewebstore.google.com/detail/MulaLens/fchnnoakpkkefkpbcliooalddncffedo) · [Report an issue](https://github.com/montasim/MulaLens/issues) · [Request privacy help or deletion](mailto:montasimmamun@gmail.com?subject=MulaLens%20privacy%20or%20deletion%20request)**
+## Start researching
 
-## Why MulaLens?
+1. Install MulaLens from the Chrome Web Store in Chrome.
+2. Open the toolbar popup. It will guide you to a supported company site; on a supported company profile, it can open that company's research directly.
+3. Find a company and select **MulaLens Analytics** beside its name. The research panel opens on the page with the available insights.
+4. Explore **Insights**, **Pay & roles**, and **Stories**. Open source links for context. **Ask the evidence** lets you submit a focused question and read a cited answer after accepting its storage disclosure.
 
-Company research often means copying an obfuscated name into several tabs, reconciling inconsistent identities, and separating community reports from verified facts. The extension keeps that workflow beside the company page, returns source-linked evidence from one backend boundary, and labels salary and workplace signals as research inputs rather than company policy.
+On Beton Kemon and TruCareer, a button appears only when MulaLens verifies a matching company record in the b4join research API. Some listed companies will therefore have no button. If you installed or updated the extension while a company page was open, reload that tab.
 
-## Features
+The Chrome Web Store listing may have an older published version while the 3.1.0 update is under review. The source and local build instructions below describe this repository's current 3.1.0 code.
 
-- Reveals confirmed company identities behind stylized names on Deshi Mula.
-- Adds a research panel beside the site instead of sending users to a separate workflow.
-- Surfaces culture signals, community workplace stories, salary evidence, roles, and job links.
-- Searches company stories and answers questions against available evidence with citations.
-- Keeps the extension thin: company research and generated answers come from the b4join API.
-- Runs on `deshimula.com`, `betonkemon.com`, and `trucareer.co` and requests only the permissions required for its single purpose.
+## What it shows
 
-Salary and workplace information may be community-submitted. Treat it as research input and verify material claims independently before making employment decisions.
+- A company brief with workplace signals and linked sources.
+- Community workplace stories and search by role, topic, or phrase.
+- Reported salary evidence, roles, and job links where available.
+- Answers grounded in available stories and comments, with citations.
 
-> **Project status:** Published on the [Chrome Web Store](https://chromewebstore.google.com/detail/MulaLens/fchnnoakpkkefkpbcliooalddncffedo). GitHub release artifacts remain available as a manual install option.
+These are research inputs, not verified company policy. Community reports may be incomplete or outdated, and generated answers may be wrong. Check original sources and confirm consequential claims independently.
 
-## Install
+## Build and use locally
 
-### From the Chrome Web Store
+You need Chrome, Node.js **20.19.3 or newer**, and **pnpm 10.10.0**. No account, local backend, environment variables, or API key is required for the extension; research features depend on the hosted b4join API being available.
 
-1. Open the [MulaLens listing](https://chromewebstore.google.com/detail/MulaLens/fchnnoakpkkefkpbcliooalddncffedo) in Chrome.
-2. Select **Add to Chrome**.
-3. Click the MulaLens toolbar icon for the next step, or open or reload a page on [Deshi Mula](https://deshimula.com/), [Beton Kemon](https://www.betonkemon.com/), or [TruCareer](https://trucareer.co/).
-
-### From a GitHub release
-
-1. Download the Chrome unpacked ZIP from the [latest release](https://github.com/montasim/MulaLens/releases/latest).
-2. Extract the archive.
-3. Open `chrome://extensions` in Chrome.
-4. Enable **Developer mode**.
-5. Select **Load unpacked** and choose the extracted directory containing `manifest.json`.
-6. Open or reload a page on [Deshi Mula](https://deshimula.com/), [Beton Kemon](https://www.betonkemon.com/), or [TruCareer](https://trucareer.co/).
-
-### Build from source
-
-Requires Node.js 20.19.3 or newer and pnpm 10.
-
-```bash
+```sh
 git clone https://github.com/montasim/MulaLens.git
 cd MulaLens
 pnpm install --frozen-lockfile
-pnpm check
+pnpm build:extension
 ```
 
-Load `dist/extension/` as an unpacked extension, then reload any open Deshi Mula, Beton Kemon, or TruCareer tabs.
-The extension has a single Chrome Manifest V3 target, so the build is intentionally
-flat: `manifest.json` is written to `dist/extension/manifest.json`, with no
-`.output/chrome-mv3/` intermediate directory.
+Open `chrome://extensions` in Chrome, enable **Developer mode**, select **Load unpacked**, and choose `dist/extension/` (the directory containing `manifest.json`). Then open or reload a supported company page and select **MulaLens Analytics** beside a company with available research. The in-page panel is the success signal.
+
+For a packaged manual install, the [GitHub release](https://github.com/montasim/MulaLens/releases/latest) provides an unpacked extension ZIP and checksum when a release has been published. Extract the ZIP before using **Load unpacked**; keep the extracted directory in place while the extension is installed.
 
 ## How it works
 
-```text
-deshimula.com / betonkemon.com / trucareer.co
-    │ company links
-    ▼
-Content script ──typed message──► Background API bridge
-    │                                  │
-    │ Research panel                   │ HTTPS
-    ▼                                  ▼
-Browser UI                         b4join API
-```
+The content script finds company entries on the three supported sites and adds the button and research panel. Deshi Mula company links provide the research identifier. Beton Kemon identifiers are checked against the API, with explicit mappings for known differences. TruCareer uses the visible company name to form a candidate identifier and checks the returned company name before showing a button. A site's own listing does not guarantee that b4join has research for that company.
 
-The content script discovers company links and renders the interface. On Beton Kemon it first checks each identifier against the API and shows Research only for confirmed records; two known differing site identifiers are mapped explicitly. On TruCareer it derives a candidate slug from the visible company name and checks that the API record's name matches before showing a button. The background service worker is the only extension component that calls `https://b4joinacompany.netlify.app/api/v1/extension`. The backend owns company search, jobs, salary evidence, generated answers, persistence, and quotas; no raw research dataset or API key is packaged in the extension.
-
-See the [architecture documentation](./docs/ARCHITECTURE.md) for the full boundary.
-
-## Using the research panel
-
-1. Click the MulaLens toolbar icon. Outside the supported sites, it links to the three company sites.
-2. On a company profile or listing, select **MulaLens Analytics** to open the panel.
-3. On Beton Kemon and TruCareer, the button appears only when MulaLens has a matching company record. Review identity links, workplace signals, salary evidence, jobs, and related stories returned for that company.
-4. Submit a story search or an Ask question only after reviewing the retention disclosure.
-5. Follow cited source links and independently verify consequential claims before acting on them.
-
-If the panel does not appear, reload the company tab after installing or updating the extension. If the panel loads without research results, check that the hosted b4join API is reachable; the browser package does not contain an offline copy of the research dataset.
+The extension's background service worker sends research requests to `https://b4joinacompany.netlify.app/api/v1/extension`. The backend owns the company data, story search, jobs, salary evidence, answers, and quotas. The extension contains neither an offline research dataset nor a backend API key. See [architecture](docs/ARCHITECTURE.md) for the component boundary.
 
 ## Permissions and privacy
 
-| Permission | Why it is needed |
+The Manifest V3 extension runs content scripts only on `deshimula.com`, `betonkemon.com`, and `trucareer.co` (including supported `www` variants). Its API host permission covers `b4joinacompany.netlify.app`. The `activeTab` permission lets the toolbar popup inspect the current tab when clicked; `storage` remembers the user's Ask disclosure choice.
+
+The extension sends company identifiers for research requests. It sends story-search terms or Ask questions when you use those features. It does not request an account or collect browsing history. The Ask form explains the stated retention terms before the first submission, and the popup can reset that saved choice. See the [privacy policy](PRIVACY.md) for data handling and deletion requests.
+
+## Workspace and checks
+
+| Path | Purpose |
 | --- | --- |
-| `storage` | Remembers whether the user accepted the disclosure shown before the first Ask request |
-| `activeTab` | Lets the toolbar popup identify the current supported company page when you click the extension |
-| `https://deshimula.com/*` | Finds company entries and renders the research panel on Deshi Mula |
-| `https://betonkemon.com/*`, `https://www.betonkemon.com/*` | Finds supported company entries and renders the research panel on Beton Kemon |
-| `https://trucareer.co/*`, `https://www.trucareer.co/*` | Reads visible company names, checks matches, and renders the research panel on TruCareer |
-| `https://b4joinacompany.netlify.app/*` | Retrieves company research and submits explicit story searches or Ask questions |
+| `apps/extension/` | Browser UI, content script, API bridge, build, and tests |
+| `apps/web/` | Product website built with TanStack Start and React |
+| `docs/` | Architecture, decisions, site research, and Store submission guidance |
+| `store-assets/v3.1.0/` | Captured screenshots and promotional media |
 
-The extension does not request an account, collect browsing history, or inject remote executable code. Questions are sent only when the user submits the Ask form and accepts its retention disclosure. Privacy questions and deletion requests use the direct private email process in the policy; no Chrome Web Store listing is required.
+```sh
+pnpm check             # Check, test, and build both apps
+pnpm check:extension   # Check and build only the extension
+pnpm check:web         # Check and build only the website
+pnpm dev:web           # Start the website at http://localhost:3000
+```
 
-Read the complete [privacy policy](./PRIVACY.md).
+The website is a separate workspace app. Its current copy still focuses on Deshi Mula, while this extension source supports three sites. `pnpm build:web` produces its Netlify deployment output; the extension build writes `dist/extension/` directly. Version tags matching `v*` trigger the [release workflow](.github/workflows/release.yml), which checks the workspace and packages the extension with a SHA-256 checksum. [Store submission guidance](docs/CHROME_WEB_STORE.md) describes the separate Chrome Web Store update process.
 
-## Development
+## Help and participation
 
-| Command | Purpose |
-| --- | --- |
-| `pnpm dev:web` | Run the TanStack Start landing page on `http://localhost:3000` |
-| `pnpm build:extension` | Build the unpacked extension into `dist/extension/` |
-| `pnpm build:web` | Build the landing page and Netlify SSR output |
-| `pnpm build` | Build both workspace applications |
-| `pnpm check:extension` | Run extension typecheck, lint, tests, and build |
-| `pnpm check:web` | Generate routes, lint, typecheck, and build the website |
-| `pnpm check` | Verify both workspace applications |
+Use [GitHub Issues](https://github.com/montasim/MulaLens/issues) for reproducible bugs and focused feature requests. Include the supported site, page type, expected behavior, and what happened. Do not post private questions or sensitive workplace details in public issues. Focused pull requests are welcome; run `pnpm check` and include a screenshot for visible UI changes.
 
-No environment variables, credentials, or local backend are required. The hosted b4join API must be available for research results and cited answers to load.
+For a vulnerability or a private data request, use the contact and reporting instructions in the [privacy policy](PRIVACY.md). Voluntary support is listed in the repository's [funding metadata](.github/FUNDING.yml).
 
-## Technology
+## License
 
-| Area | Technology |
-| --- | --- |
-| Browser platform | Chrome Manifest V3 |
-| Extension code | TypeScript, content script, background service worker |
-| Extension interface | Browser DOM, repository-owned styles and icons |
-| Product website | TanStack Start, React, shadcn, Tailwind CSS |
-| API boundary | Typed HTTPS messages to the hosted b4join extension endpoint |
-| Validation and tests | TypeScript, ESLint, Vitest |
-| Packaging | Repository build scripts, ZIP archive, SHA-256 checksum |
-| Website deployment | Netlify SSR adapter |
-
-## Project structure
-
-- `apps/extension/` — content script, background API bridge, contracts, tests, and extension build
-- `apps/web/` — TanStack Start landing page built with shadcn and Tailwind CSS
-- `docs/` — architecture, decisions, and Chrome Web Store submission guidance
-- `store-assets/` — listing screenshot and promotional artwork
-- `prototypes/extention/` — retained extension-interface design reference
-- `prototypes/web/v1.html` — retained landing-page design reference
-- `apps/web/netlify.toml` — landing-page build and deployment configuration
-
-The web app's `netlify.toml` builds and deploys `apps/web/dist/client`, matching the workspace deployment setup used by VidQuery.
-
-## Releases
-
-Version tags matching `v*` trigger the [release workflow](./.github/workflows/release.yml). It installs locked dependencies, runs `pnpm check`, packages the unpacked extension, generates a SHA-256 checksum, and publishes both files to GitHub Releases.
-
-The release archive is intended for Chrome's **Load unpacked** flow. Verify the downloaded archive against `SHA256SUMS.txt`, keep the extracted directory in a stable location, and reload the extension after replacing files during an update. See [Chrome Web Store guidance](docs/CHROME_WEB_STORE.md) for the submission process behind the published listing.
-
-## Project status and limitations
-
-- The extension is published on the [Chrome Web Store](https://chromewebstore.google.com/detail/MulaLens/fchnnoakpkkefkpbcliooalddncffedo); GitHub releases remain available for manual installs.
-- It operates only on `deshimula.com`, `betonkemon.com`, and `trucareer.co`; unrelated pages are outside its permission boundary.
-- Research, salary, workplace, and generated-answer availability depends on the hosted b4join API.
-- Community reports and salary ranges are unverified and may be incomplete, stale, or context-dependent.
-- Generated answers can be wrong; citations should be opened and consequential claims independently checked.
-- No research dataset or backend API key is bundled, so the research panel has no offline data mode.
-
-## Documentation
-
-- [Architecture](docs/ARCHITECTURE.md)
-- [Privacy policy](PRIVACY.md)
-- [Chrome Web Store preparation](docs/CHROME_WEB_STORE.md)
-- [Architecture decision record](docs/adr/0001-use-a-thin-api-dependent-extension.md)
-- [Extension prototype reference](prototypes/extention/README.md)
-- [Web prototype reference](prototypes/web/README.md)
-
-## Contributing
-
-Issues and focused pull requests are welcome. Run `pnpm check` before submitting a change, and include an updated screenshot when the research panel changes visibly. Keep the extension/API boundary and privacy policy synchronized with any change to data handling.
-
-The repository does not currently include separate contribution or code-of-conduct files. This section is the canonical contribution guidance until those documents are added; participation should remain respectful and protect user and source privacy.
-
-## Support and security
-
-Use [GitHub Issues](https://github.com/montasim/MulaLens/issues) for reproducible bugs and narrowly scoped feature requests. Avoid posting private questions, browsing details, or sensitive workplace allegations in public issues.
-
-There is no dedicated security-policy file in this repository. Report a suspected vulnerability privately to [montasimmamun@gmail.com](mailto:montasimmamun@gmail.com?subject=Security%3A%20Deshi%20Mula%20Extended) with a minimal impact summary, then coordinate before sending exploit details or sensitive data. Do not use a public issue for vulnerabilities or retained-data requests.
-
-## License status
-
-No open-source license file is currently included. Source visibility alone does not grant permission to copy, modify, or redistribute the code. The release artifacts are intended for personal installation unless the repository owner states otherwise.
-
-## Funding
-
-If MulaLens is useful to you, you can support its continued development through [SupportKori](https://www.supportkori.com/montasim).
-
-Bug reports, privacy feedback, citation corrections, and code contributions are equally valuable ways to help.
-
-## Author
-
-Built and maintained by [Montasim](https://github.com/montasim).
+This repository has no license file. Public source access does not grant permission to copy, modify, or redistribute its code.
